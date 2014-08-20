@@ -46,7 +46,7 @@ Window {
 
             Text {
                 id: gwDisplay
-                text: gw
+                text: gw + (gwInsideUniv ? "; yes" : "; no")
                 anchors.centerIn: parent
             }
 

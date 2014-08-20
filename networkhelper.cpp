@@ -4,8 +4,11 @@
 #  include <wbemidl.h>
 #  include <comdef.h>
 #  include <windows.h>
-#  pragma comment(lib, "ws2_32.lib")
-#  pragma comment(lib, "Wbemuuid.lib")
+#  ifdef _MSC_VER
+#    pragma comment(lib, "ws2_32.lib")
+#    pragma comment(lib, "Wbemuuid.lib")
+#  endif  // #ifdef _MSC_VER
+#include <iostream>
 #else  // #ifdef Q_OS_WIN
 #  define BUFSIZE 8192
 #  include <arpa/inet.h>
@@ -78,7 +81,7 @@ static void parseRoutes(struct nlmsghdr *nlHdr, struct route_info *rtInfo) {
 
 
 namespace JNRain {
-    QString NetworkHelper::getDefaultGateway() {
+    QString NetworkHelper::getDefaultGatewayAsString() {
         QString ret;
 #ifdef Q_OS_WIN
         CoInitialize(NULL);
@@ -180,5 +183,24 @@ namespace JNRain {
         close(sock);
 #endif  // #ifdef Q_OS_WIN
         return ret;
+    }
+
+    int NetworkHelper::getDefaultGateway(QHostAddress &address) {
+        QString gwString = NetworkHelper::getDefaultGatewayAsString();
+
+        if (gwString.isNull() || gwString.isEmpty()) {
+            return -1;
+        }
+
+        address = *(new QHostAddress(gwString));
+        return 0;
+    }
+
+    bool NetworkHelper::isIPInsideUniv(const QHostAddress &addr) {
+        // TODO: 目前我们只关心宿舍区
+        const QHostAddress dormSubnet("172.16.0.0");
+        const int dormSubnetMask = 12;
+
+        return addr.isInSubnet(dormSubnet, dormSubnetMask);
     }
 }
