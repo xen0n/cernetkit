@@ -25,6 +25,14 @@ int main(int argc, char *argv[])
     // test
     JNRain::NetworkHelper::queryRoutingTable();
     qDebug() << "netmask for /12 =" << QHostAddress(JNRain::NetworkHelper::getMaskFromPrefixLength(12)).toString();
+    qDebug()
+            << "test add/update persistent route:"
+            << JNRain::NetworkHelper::addRoutingTableEntry(
+                QHostAddress("123.45.64.0"),
+                18,
+                QHostAddress("127.1.2.3"),
+                true
+                );
 
     engine.load(QUrl(QStringLiteral("qrc:///main.qml")));
 
