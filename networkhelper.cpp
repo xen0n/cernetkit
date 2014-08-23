@@ -89,7 +89,8 @@ namespace JNRain {
         QString ret;
 #ifdef Q_OS_WIN
         CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-        if (CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_PKT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, 0) != S_OK)
+        HRESULT securityInitRet = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_PKT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, 0);
+        if (securityInitRet != S_OK && securityInitRet != RPC_E_TOO_LATE)
             return ret;
 
         IWbemLocator *pLoc = NULL;
