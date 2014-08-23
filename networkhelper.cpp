@@ -88,7 +88,7 @@ namespace JNRain {
     QString NetworkHelper::getDefaultGatewayAsString() {
         QString ret;
 #ifdef Q_OS_WIN
-        CoInitialize(NULL);
+        CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
         if (CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_PKT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, 0) != S_OK)
             return ret;
 
