@@ -8,6 +8,9 @@
 #    pragma comment(lib, "ws2_32.lib")
 #    pragma comment(lib, "Wbemuuid.lib")
 #  endif  // #ifdef _MSC_VER
+#  ifdef __GNUC__
+#    pragma GCC diagnostic ignored "-Wwrite-strings"
+#  endif  // #ifdef __GNUC__
 #include <iostream>
 #include <QtDebug>
 #else  // #ifdef Q_OS_WIN
