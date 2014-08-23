@@ -240,6 +240,15 @@ namespace JNRain {
             if (!uReturn)
                 break;
 
+            // Name
+            _variant_t vaName;
+            QString routeName;
+            hr = pclsObj->Get(L"Name", 0, &vaName, NULL, NULL);
+            if (hr == WBEM_S_NO_ERROR && vaName.vt != VT_NULL) {
+                routeName = QString::fromUtf16(reinterpret_cast<const ushort *>(vaName.pbstrVal));
+            }
+            VariantClear(&vaName);
+
             // Caption
             _variant_t vaCaption;
             QString routeCaption;
@@ -286,7 +295,8 @@ namespace JNRain {
             VariantClear(&vaMask);
 
             qDebug()
-                    << "ROUTE: caption" << routeCaption
+                    << "ROUTE: name" << routeName
+                    << "caption" << routeCaption
                     << "desc" << routeDesc
                     << "dest" << routeDest
                     << "mask" << routeMask
