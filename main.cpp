@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QtDebug>
 
 #include "networkhelper.h"
 
@@ -23,6 +24,7 @@ int main(int argc, char *argv[])
 
     // test
     JNRain::NetworkHelper::queryRoutingTable();
+    qDebug() << "netmask for /12 =" << QHostAddress(JNRain::NetworkHelper::getMaskFromPrefixLength(12)).toString();
 
     engine.load(QUrl(QStringLiteral("qrc:///main.qml")));
 

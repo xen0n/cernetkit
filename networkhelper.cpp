@@ -308,4 +308,9 @@ namespace JNRain {
 #endif  // #ifdef Q_OS_WIN
         return 0;
     }
+
+    int32_t NetworkHelper::getMaskFromPrefixLength(const unsigned int prefixLength) {
+        unsigned int shift = 32 - prefixLength;
+        return (int32_t)(((uint32_t)(-1) >> shift) << shift);
+    }
 }
