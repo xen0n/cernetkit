@@ -21,6 +21,9 @@ int main(int argc, char *argv[])
         ctx->setContextProperty("gw", "failed to get gw");
     }
 
+    // test
+    JNRain::NetworkHelper::queryRoutingTable();
+
     engine.load(QUrl(QStringLiteral("qrc:///main.qml")));
 
     return app.exec();

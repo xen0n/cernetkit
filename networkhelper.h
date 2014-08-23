@@ -12,6 +12,7 @@ namespace JNRain {
         static QString getDefaultGatewayAsString();
         static int getDefaultGateway(QHostAddress &addr);
         static bool isIPInsideUniv(const QHostAddress &addr);
+        static int queryRoutingTable();
     };
 }
 

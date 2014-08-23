@@ -9,6 +9,7 @@
 #    pragma comment(lib, "Wbemuuid.lib")
 #  endif  // #ifdef _MSC_VER
 #include <iostream>
+#include <QtDebug>
 #else  // #ifdef Q_OS_WIN
 #  define BUFSIZE 8192
 #  include <arpa/inet.h>
@@ -202,5 +203,105 @@ namespace JNRain {
         const int dormSubnetMask = 12;
 
         return addr.isInSubnet(dormSubnet, dormSubnetMask);
+    }
+
+    int NetworkHelper::queryRoutingTable() {
+#ifdef Q_OS_WIN
+        CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+        HRESULT securityInitRet = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_PKT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, 0);
+        if (securityInitRet != S_OK && securityInitRet != RPC_E_TOO_LATE)
+            return -1;
+
+        IWbemLocator *pLoc = NULL;
+        if (CoCreateInstance(CLSID_WbemAdministrativeLocator, NULL, CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER, IID_IUnknown, (void **)&pLoc) != S_OK)
+            return -2;
+
+        IWbemServices *pSvc = NULL;
+        if (pLoc->ConnectServer(L"root\\cimv2", NULL, NULL, NULL, 0, NULL, NULL, &pSvc) != S_OK)
+            return -3;
+
+        IEnumWbemClassObject *pEnumerator = NULL;
+        HRESULT hr = pSvc->ExecQuery(L"WQL", L"SELECT * FROM Win32_IP4RouteTable", WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
+        if (FAILED(hr)) {
+            pSvc->Release();
+            pLoc->Release();
+            CoUninitialize();
+            return -4;
+        }
+
+        IWbemClassObject *pclsObj = NULL;
+        while (pEnumerator) {
+            ULONG uReturn;
+            hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+            if (!uReturn)
+                break;
+
+            // Caption
+            _variant_t vaCaption;
+            QString routeCaption;
+            hr = pclsObj->Get(L"Caption", 0, &vaCaption, NULL, NULL);
+            if (hr == WBEM_S_NO_ERROR && vaCaption.vt != VT_NULL) {
+                routeCaption = QString::fromUtf16(reinterpret_cast<const ushort *>(vaCaption.pbstrVal));
+            }
+            VariantClear(&vaCaption);
+
+            // Description
+            _variant_t vaDescription;
+            QString routeDesc;
+            hr = pclsObj->Get(L"Description", 0, &vaDescription, NULL, NULL);
+            if (hr == WBEM_S_NO_ERROR && vaDescription.vt != VT_NULL) {
+                routeDesc = QString::fromUtf16(reinterpret_cast<const ushort *>(vaDescription.pbstrVal));
+            }
+            VariantClear(&vaCaption);
+
+            // Destination
+            _variant_t vaDestination;
+            QString routeDest;
+            hr = pclsObj->Get(L"Destination", 0, &vaDestination, NULL, NULL);
+            if (hr == WBEM_S_NO_ERROR && vaDestination.vt != VT_NULL) {
+                routeDest = QString::fromUtf16(reinterpret_cast<const ushort *>(vaDestination.pbstrVal));
+            }
+            VariantClear(&vaDestination);
+
+            // NextHop
+            _variant_t vaNextHop;
+            QString routeNext;
+            hr = pclsObj->Get(L"NextHop", 0, &vaNextHop, NULL, NULL);
+            if (hr == WBEM_S_NO_ERROR && vaNextHop.vt != VT_NULL) {
+                routeNext = QString::fromUtf16(reinterpret_cast<const ushort *>(vaNextHop.pbstrVal));
+            }
+            VariantClear(&vaNextHop);
+
+            // Mask
+            _variant_t vaMask;
+            QString routeMask;
+            hr = pclsObj->Get(L"Mask", 0, &vaMask, NULL, NULL);
+            if (hr == WBEM_S_NO_ERROR && vaMask.vt != VT_NULL) {
+                routeMask = QString::fromUtf16(reinterpret_cast<const ushort *>(vaMask.pbstrVal));
+            }
+            VariantClear(&vaMask);
+
+            qDebug()
+                    << "ROUTE: caption" << routeCaption
+                    << "desc" << routeDesc
+                    << "dest" << routeDest
+                    << "mask" << routeMask
+                    << "next" << routeNext
+                    ;
+        }
+
+        if (pclsObj)
+            pclsObj->Release();
+        if (pEnumerator)
+            pEnumerator->Release();
+        if (pSvc)
+            pSvc->Release();
+        if (pLoc)
+            pLoc->Release();
+        CoUninitialize();
+#else  // #ifdef Q_OS_WIN
+        // TODO
+#endif  // #ifdef Q_OS_WIN
+        return 0;
     }
 }
