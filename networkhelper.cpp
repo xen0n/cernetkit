@@ -337,6 +337,7 @@ namespace JNRain {
         _variant_t vaDestination;
         _variant_t vaMask;
         _variant_t vaNextHop;
+        _variant_t vaMetric1;
 
         QString className(isPersistent ? "Win32_IP4PersistedRouteTable" : "Win32_IP4RouteTable");
         QString destAddrStr = destination.toString();
@@ -429,6 +430,9 @@ namespace JNRain {
         vaDestination.vt = VT_BSTR;
         vaDestination.bstrVal = bstr_t(reinterpret_cast<const wchar_t *>(destAddrStr.utf16()));
         pInstance->Put(bstr_t(L"Destination"), 0, &vaDestination, 0);
+        pInstance->Put(bstr_t(L"Name"), 0, &vaDestination, 0);
+        pInstance->Put(bstr_t(L"Caption"), 0, &vaDestination, 0);
+        pInstance->Put(bstr_t(L"Description"), 0, &vaDestination, 0);
         VariantClear(&vaDestination);
 
         // Mask
@@ -443,10 +447,17 @@ namespace JNRain {
         pInstance->Put(bstr_t(L"NextHop"), 0, &vaNextHop, 0);
         VariantClear(&vaNextHop);
 
+        // Metric1
+        vaMetric1.vt = VT_I4;
+        vaMetric1.intVal = 1;  // FIXME: 处理非永久路由情况
+        pInstance->Put(bstr_t(L"Metric1"), 0, &vaMetric1, 0);
+        VariantClear(&vaMetric1);
+
         // 写入 WMI
-        hres = pSvc->PutInstance(pInstance, WBEM_FLAG_CREATE_OR_UPDATE, NULL, NULL);
+        // hres = pSvc->PutInstance(pInstance, WBEM_FLAG_CREATE_OR_UPDATE, NULL, NULL);
+        hres = pSvc->PutInstanceAsync(pInstance, WBEM_FLAG_CREATE_OR_UPDATE, NULL, NULL);
         if (FAILED(hres)) {
-            qDebug() << "PutInstance failed:" << hres;
+            qDebug() << QString("PutInstance failed: 0x%1").arg(QString::number((uint32_t)hres, 16));
             ret = -7;
             goto out;
         }
