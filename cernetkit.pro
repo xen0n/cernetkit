@@ -14,9 +14,44 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 HEADERS += \
-    networkhelper.h
+    networkhelperimplbase.h \
+    networkhelper.h \
+    univhelperimplbase.h \
+    networkhelperdata.h \
+    univhelperimpljiangnan.h
 
 
+# platform implementations
+win32 {
+    SOURCES += \
+        networkhelperimplwindows.cpp
+
+    HEADERS += \
+        networkhelperimplwindows.h
+}
+
+linux {
+    SOURCES += \
+        networkhelperimpllinux.cpp
+
+    HEADERS += \
+        networkhelperimpllinux.h
+}
+
+
+# University helper implementations
+# TODO: real configurable university selection, hardcoded for now as there is
+# only 1 university supported
+DEFINES += UNIV_JIANGNAN
+
+SOURCES += \
+    univhelperimpljiangnan.cpp
+
+HEADERS += \
+    univhelperimpljiangnan.h
+
+
+# link settings for g++ under Windows
 win32-g++ {
     WindowsSdkDir = $$system(cmd /C windows-sdk-helper.bat)
 
