@@ -53,11 +53,12 @@ HEADERS += \
 
 # link settings for g++ under Windows
 win32-g++ {
-    WindowsSdkDir = $$system(cmd /C windows-sdk-helper.bat)
+    # WindowsSdkDir = $$system(cmd /C windows-sdk-helper.bat)
 
-    exists($$WindowsSdkDir) {
-        LIBS += -lws2_32 -lole32 -loleaut32 -luuid -L"$$WindowsSdkDir\Lib" -lWbemUuid
-    } else {
-        error(Windows SDK is required to build this project.)
-    }
+    # exists($$WindowsSdkDir) {
+    #     LIBS += -lws2_32 -lole32 -loleaut32 -luuid -L"$$WindowsSdkDir\Lib" -lWbemUuid
+    # } else {
+    #     error(Windows SDK is required to build this project.)
+    # }
+    LIBS += -lws2_32 -liphlpapi
 }
